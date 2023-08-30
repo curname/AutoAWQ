@@ -5,7 +5,7 @@ import torch.nn as nn
 from transformers.models.bloom.modeling_bloom import BloomBlock, BloomGelu
 from transformers.models.opt.modeling_opt import OPTDecoderLayer
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer, LlamaRMSNorm
-from transformers.activations import NewGELUActivation
+from transformers.activations import NewGELUActivation, GELUActivation
 from .qmodule import ScaledActivation
 from awq.utils.module import get_op_by_name, get_op_name, set_op_by_name
 
@@ -195,7 +195,7 @@ def apply_scale(module, scales_list, input_feat_dict=None):
             scale_fc_fc(prev_op, layers[0], scales)
         elif isinstance(prev_op, (nn.LayerNorm, LlamaRMSNorm)):
             scale_ln_fcs(prev_op, layers, scales)
-        elif any(isinstance(prev_op,t) for t in [nn.GELU, BloomGelu, NewGELUActivation]):
+        elif any(isinstance(prev_op,t) for t in [nn.GELU, BloomGelu, NewGELUActivation, GELUActivation]):
             new_module = ScaledActivation(prev_op, scales)
             set_op_by_name(module, prev_op_name, new_module)
             scale_gelu_fc(prev_op, layers[0], scales)
